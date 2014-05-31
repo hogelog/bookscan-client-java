@@ -1,4 +1,4 @@
-package org.hogel.bookscan;
+package org.hogel.bookscan.listener;
 
 import org.hogel.bookscan.models.Book;
 

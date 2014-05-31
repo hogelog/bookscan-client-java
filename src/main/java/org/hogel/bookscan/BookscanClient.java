@@ -2,6 +2,7 @@ package org.hogel.bookscan;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.hogel.bookscan.listener.FetchBooksListener;
 import org.hogel.bookscan.listener.LoginListener;
 import org.hogel.bookscan.models.Book;
 import org.jsoup.Connection;
