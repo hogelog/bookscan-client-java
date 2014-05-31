@@ -9,14 +9,16 @@ public class Book {
     private String filename;
     private String hash;
     private String digest;
+    private String imageUrl;
 
     public Book() {
     }
 
-    public Book(String filename, String hash, String digest) {
+    public Book(String filename, String hash, String digest, String imageUrl) {
         this.filename = filename;
         this.hash = hash;
         this.digest = digest;
+        this.imageUrl = imageUrl;
     }
 
     public String getFilename() {
@@ -43,7 +45,15 @@ public class Book {
         this.digest = digest;
     }
 
-    public String getDownloadUrl() {
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String createDownloadUrl() {
         try {
             return String.format("%s?d=%s&f=%s", Constants.URL_DOWNLOAD, digest, URLEncoder.encode(filename, "UTF-8"));
         } catch (UnsupportedEncodingException e) {

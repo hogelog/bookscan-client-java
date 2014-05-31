@@ -56,7 +56,7 @@ public class BookscanClient {
         try {
             Document document = connector.execute(connection);
 
-            Elements bookLinks = document.select("#sortable_box > div > a");
+            Elements bookLinks = document.select("#sortable_box .showbook");
             List<Book> books = new ArrayList<>();
             for (Element bookLink : bookLinks) {
                 String url = Constants.URL_ROOT + bookLink.attr("href");
@@ -78,7 +78,13 @@ public class BookscanClient {
                 if (filename == null || hash == null || digest == null) {
                     continue;
                 }
-                final Book book = new Book(filename, hash, digest);
+                Elements imgElement = bookLink.select("img");
+                Book book;
+                if (imgElement.size() == 0) {
+                    book = new Book(filename, hash, digest, null);
+                } else {
+                    book = new Book(filename, hash, digest, imgElement.first().attr("src"));
+                }
                 books.add(book);
             }
             listener.onSuccess(books);

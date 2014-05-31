@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -96,9 +97,11 @@ public class BookscanClientTest {
         assertThat(fetchBooks.get(0).getHash(), is("hash1"));
         assertThat(fetchBooks.get(0).getDigest(), is("digest1"));
         assertThat(fetchBooks.get(0).getFilename(), is("filename1"));
+        assertThat(fetchBooks.get(0).getImageUrl(), is(nullValue()));
 
         assertThat(fetchBooks.get(1).getHash(), is("hash2"));
         assertThat(fetchBooks.get(1).getDigest(), is("digest2"));
         assertThat(fetchBooks.get(1).getFilename(), is("filename2"));
+        assertThat(fetchBooks.get(1).getImageUrl(), is("http://example.com/hoge.jpg"));
     }
 }
