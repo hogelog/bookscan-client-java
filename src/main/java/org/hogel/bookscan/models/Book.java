@@ -55,7 +55,22 @@ public class Book {
 
     public String createDownloadUrl() {
         try {
-            return String.format("%s?d=%s&f=%s", Constants.URL_DOWNLOAD, digest, URLEncoder.encode(filename, "UTF-8"));
+            StringBuilder builder = new StringBuilder(Constants.URL_DOWNLOAD);
+            builder.append("?d=").append(digest);
+            builder.append("&f=").append(URLEncoder.encode(filename, "UTF-8"));
+            return builder.toString();
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public String createOptimizeUrl() {
+        try {
+            StringBuilder builder = new StringBuilder(Constants.URL_OPTIMIZE);
+            builder.append("?hash=").append(hash);
+            builder.append("&d=").append(digest);
+            builder.append("&filename=").append(URLEncoder.encode(filename, "UTF-8"));
+            return builder.toString();
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException(e);
         }

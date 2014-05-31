@@ -12,4 +12,10 @@ public class BookTest {
         Book book = new Book("あ.pdf", "hash", "digest", null);
         assertThat(book.createDownloadUrl(), is(Constants.URL_DOWNLOAD + "?d=digest&f=%E3%81%82.pdf"));
     }
+
+    @Test
+    public void createOptimizeUrl() {
+        Book book = new Book("あ.pdf", "hash", "digest", null);
+        assertThat(book.createOptimizeUrl(), is(Constants.URL_OPTIMIZE + "?hash=hash&d=digest&filename=%E3%81%82.pdf"));
+    }
 }
