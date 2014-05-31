@@ -1,4 +1,4 @@
-package org.hogel.bookscan.models;
+package org.hogel.bookscan.model;
 
 import org.hogel.bookscan.Constants;
 

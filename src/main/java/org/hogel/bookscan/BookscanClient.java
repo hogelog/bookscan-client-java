@@ -3,8 +3,10 @@ package org.hogel.bookscan;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hogel.bookscan.listener.FetchBooksListener;
+import org.hogel.bookscan.listener.FetchOptimizedBooksListener;
 import org.hogel.bookscan.listener.LoginListener;
-import org.hogel.bookscan.models.Book;
+import org.hogel.bookscan.model.Book;
+import org.hogel.bookscan.model.OptimizedBook;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -87,6 +89,38 @@ public class BookscanClient {
                     book = new Book(filename, hash, digest, imgElement.first().attr("src"));
                 }
                 books.add(book);
+            }
+            listener.onSuccess(books);
+        } catch (IOException | URISyntaxException e) {
+            listener.onError(e);
+        }
+    }
+
+    public void fetchOptimizedBooks(FetchOptimizedBooksListener listener) {
+        Connection connection = connector.connect(Constants.URL_OPTIMIZED_BOOKS).method(Connection.Method.GET);
+        try {
+            Document document = connector.execute(connection);
+
+            Elements bookLinks = document.select("a.download");
+            List<OptimizedBook> books = new ArrayList<>();
+            for (Element bookLink : bookLinks) {
+                String url = Constants.URL_ROOT + bookLink.attr("href");
+                List<NameValuePair> params = URLEncodedUtils.parse(new URI(url), UTF8.name());
+                String filename = null, digest = null;
+                for (NameValuePair param : params) {
+                    switch (param.getName()) {
+                        case "f":
+                            filename = param.getValue();
+                            break;
+                        case "d":
+                            digest = param.getValue();
+                            break;
+                    }
+                }
+                if (filename == null || digest == null) {
+                    continue;
+                }
+                books.add(new OptimizedBook(filename, digest));
             }
             listener.onSuccess(books);
         } catch (IOException | URISyntaxException e) {

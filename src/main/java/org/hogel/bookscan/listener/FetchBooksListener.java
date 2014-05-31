@@ -1,6 +1,6 @@
 package org.hogel.bookscan.listener;
 
-import org.hogel.bookscan.models.Book;
+import org.hogel.bookscan.model.Book;
 
 import java.util.List;
 

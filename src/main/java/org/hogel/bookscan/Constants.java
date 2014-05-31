@@ -6,4 +6,5 @@ public class Constants {
     public static final String URL_MYPAGE = "https://system.bookscan.co.jp/bookshelf_all_cover.php";
     public static final String URL_DOWNLOAD = "https://system.bookscan.co.jp/download.php";
     public static final String URL_OPTIMIZE = "https://system.bookscan.co.jp/bookoptimize.php";
+    public static final String URL_OPTIMIZED_BOOKS = "https://system.bookscan.co.jp/tunelablist.php";
 }

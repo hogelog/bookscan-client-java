@@ -3,9 +3,9 @@ package org.hogel.bookscan;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import org.hogel.bookscan.listener.FetchBooksListener;
-import org.hogel.bookscan.listener.LoginListener;
-import org.hogel.bookscan.models.Book;
+import org.hogel.bookscan.listener.*;
+import org.hogel.bookscan.model.Book;
+import org.hogel.bookscan.model.OptimizedBook;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -79,14 +79,10 @@ public class BookscanClientTest {
     @Test
     public void fetchBookListSuccess() throws IOException {
         final List<Book> fetchBooks = Lists.newArrayList();
-        FetchBooksListener listener = new FetchBooksListener() {
+        FetchBooksListener listener = new FetchBooksAdapter() {
             @Override
             public void onSuccess(List<Book> books) {
                 fetchBooks.addAll(books);
-            }
-
-            @Override
-            public void onError(Exception e) {
             }
         };
 
@@ -104,5 +100,27 @@ public class BookscanClientTest {
         assertThat(fetchBooks.get(1).getDigest(), is("digest2"));
         assertThat(fetchBooks.get(1).getFilename(), is("filename2"));
         assertThat(fetchBooks.get(1).getImageUrl(), is("http://example.com/hoge.jpg"));
+    }
+
+    @Test
+    public void fetchOptimizedBookListSuccess() throws IOException {
+        final List<OptimizedBook> fetchBooks = Lists.newArrayList();
+        FetchOptimizedBooksListener listener = new FetchOptimizedBooksAdapter() {
+            @Override
+            public void onSuccess(List<OptimizedBook> books) {
+                fetchBooks.addAll(books);
+            }
+        };
+
+        Document booksDocument = Jsoup.parse(getResourceString("/data/optimized_books.html"));
+        doReturn(booksDocument).when(connector).execute(any(Connection.class));
+
+        client.fetchOptimizedBooks(listener);
+
+        assertThat(fetchBooks.get(0).getDigest(), is("digest1"));
+        assertThat(fetchBooks.get(0).getFilename(), is("filename1"));
+
+        assertThat(fetchBooks.get(1).getDigest(), is("digest2"));
+        assertThat(fetchBooks.get(1).getFilename(), is("filename2"));
     }
 }
