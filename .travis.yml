@@ -1,1 +1,5 @@
 language: java
+env:
+  global:
+    - ORG_GRADLE_PROJECT_BINTRAY_USER=dummy
+    - ORG_GRADLE_PROJECT_BINTRAY_TOKEN=dummy
