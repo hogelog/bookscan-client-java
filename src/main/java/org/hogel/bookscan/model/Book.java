@@ -75,4 +75,10 @@ public class Book {
             throw new IllegalStateException(e);
         }
     }
+
+    public String createOptimizedUrl() {
+        StringBuilder builder = new StringBuilder(Constants.URL_OPTIMIZED);
+        builder.append("?hash=").append(hash);
+        return builder.toString();
+    }
 }

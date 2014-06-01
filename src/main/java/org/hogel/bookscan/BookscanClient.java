@@ -5,9 +5,11 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.hogel.bookscan.listener.FetchBooksListener;
 import org.hogel.bookscan.listener.FetchOptimizedBooksListener;
 import org.hogel.bookscan.listener.LoginListener;
+import org.hogel.bookscan.listener.RequestBookOptimizeListener;
 import org.hogel.bookscan.model.Book;
 import org.hogel.bookscan.model.OptimizedBook;
 import org.jsoup.Connection;
+import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -126,5 +128,61 @@ public class BookscanClient {
         } catch (IOException | URISyntaxException e) {
             listener.onError(e);
         }
+    }
+
+    public void requestBookOptimize(Book book, OptimizeOption option, RequestBookOptimizeListener listener) {
+        String optimizeUrl = book.createOptimizeUrl();
+
+        final List<OptimizeOption.Type> types = option.getTypes();
+        final List<OptimizeOption.Flag> flags = option.getFlags();
+        if (types.size() == 0) {
+            listener.onError(new Exception("Optimize option is not specified"));
+            return;
+        }
+
+        try {
+            List<Connection.KeyVal> hiddenOptions = fetchHiddenOptimizeOptions(optimizeUrl);
+
+            Connection connection = connector.connect(optimizeUrl).method(Connection.Method.POST);
+
+            for (Connection.KeyVal hiddenOption : hiddenOptions) {
+                connection = connection.data(hiddenOption.key(), hiddenOption.value());
+            }
+
+            for (OptimizeOption.Type type : types) {
+                connection = connection.data(OptimizeOption.OPTIMIZE_TYPE_NAME, type.getValue());
+            }
+
+            for (OptimizeOption.Flag flag : flags) {
+                connection = connection.data(flag.getInputName(), flag.getValue());
+            }
+
+            Document document = connector.execute(connection);
+            if (book.createOptimizedUrl().equals(document.location())) {
+                listener.onSuccess();
+            } else {
+                listener.onError(new BookscanException(document));
+            }
+        } catch (IOException e) {
+            listener.onError(e);
+        }
+    }
+
+    private List<Connection.KeyVal> fetchHiddenOptimizeOptions(String optimizeUrl) throws IOException {
+        Connection connection = connector.connect(optimizeUrl).method(Connection.Method.GET);
+        Document document = connector.execute(connection);
+        Elements inputs = document.select("input");
+
+        final List<Connection.KeyVal> keyVals = new ArrayList<>();
+
+        for (Element input : inputs) {
+            if (input.attr("type").equals("hidden")) {
+                final String name = input.attr("name");
+                final String value = input.attr("value");
+                keyVals.add(HttpConnection.KeyVal.create(name, value));
+            }
+        }
+        
+        return keyVals;
     }
 }

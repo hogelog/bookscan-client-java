@@ -123,4 +123,34 @@ public class BookscanClientTest {
         assertThat(fetchBooks.get(1).getDigest(), is("digest2"));
         assertThat(fetchBooks.get(1).getFilename(), is("filename2"));
     }
+
+    @Test
+    public void requestBookOptimizeSuccess() throws IOException {
+        Book book = new Book("hoge.pdf", "hash", "digest", null);
+        RequestBookOptimizeListener listener = mock(RequestBookOptimizeListener.class);
+
+        Document document = Jsoup.parse(getResourceString("/data/book_optimize.html"), book.createOptimizedUrl());
+        doReturn(document).when(connector).execute(any(Connection.class));
+
+        final OptimizeOption option = new OptimizeOption();
+
+        option.addType(OptimizeOption.Type.KINDLEP);
+        option.addType(OptimizeOption.Type.ANDROID);
+
+        option.addFlag(OptimizeOption.Flag.COVER);
+        option.addFlag(OptimizeOption.Flag.BOLD);
+
+        client.requestBookOptimize(book, option, listener);
+
+        verify(listener).onSuccess();
+
+        verify(connection).data("abc", "12345");
+        verify(connection).data("def", "67890");
+
+        verify(connection).data(OptimizeOption.OPTIMIZE_TYPE_NAME, OptimizeOption.Type.KINDLEP.getValue());
+        verify(connection).data(OptimizeOption.OPTIMIZE_TYPE_NAME, OptimizeOption.Type.ANDROID.getValue());
+
+        verify(connection).data(OptimizeOption.Flag.COVER.getInputName(), OptimizeOption.Flag.COVER.getValue());
+        verify(connection).data(OptimizeOption.Flag.BOLD.getInputName(), OptimizeOption.Flag.BOLD.getValue());
+    }
 }
