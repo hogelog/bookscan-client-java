@@ -1,7 +1,18 @@
+buildscript {
+    repositories {
+        maven { url 'http://jcenter.bintray.com' }
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'bintray'
 
 sourceCompatibility = 1.7
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 repositories {
     mavenCentral()
@@ -15,3 +26,48 @@ dependencies {
     testCompile 'org.mockito:mockito-core:1.9.5'
     testCompile 'com.google.guava:guava:17.0'
 }
+
+task sourceJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'org.hogel'
+            artifactId 'bookscan-client'
+            version "$version"
+
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+        }
+
+        repositories {
+            maven {
+                url "$buildDir/repo"
+            }
+        }
+    }
+}
+
+bintray {
+    user = "$BINTRAY_USER"
+    key = "$BINTRAY_TOKEN"
+    publications = ['mavenJava']
+    pkg {
+        repo = 'maven'
+        userOrg = 'hogelog'
+        name = 'bookscan-client-java'
+        desc = 'Bookscan client for Java'
+        licenses = ['MIT']
+        labels = []
+    }
+}
+bintrayUpload.dependsOn jar, sourceJar, javadocJar
