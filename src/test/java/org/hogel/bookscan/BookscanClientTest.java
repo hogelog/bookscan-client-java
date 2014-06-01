@@ -6,6 +6,7 @@ import com.google.common.io.Resources;
 import org.hogel.bookscan.listener.*;
 import org.hogel.bookscan.model.Book;
 import org.hogel.bookscan.model.OptimizedBook;
+import org.hogel.bookscan.model.OptimizingBook;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -152,5 +153,31 @@ public class BookscanClientTest {
 
         verify(connection).data(OptimizeOption.Flag.COVER.getInputName(), OptimizeOption.Flag.COVER.getValue());
         verify(connection).data(OptimizeOption.Flag.BOLD.getInputName(), OptimizeOption.Flag.BOLD.getValue());
+    }
+
+    @Test
+    public void fetchOptimizingBookListSuccess() throws IOException {
+        final List<OptimizingBook> fetchBooks = Lists.newArrayList();
+        FetchOptimizingBooksListener listener = new FetchOptimizingBooksAdapter() {
+            @Override
+            public void onSuccess(List<OptimizingBook> books) {
+                fetchBooks.addAll(books);
+            }
+        };
+
+        Document booksDocument = Jsoup.parse(getResourceString("/data/optimizing_books.html"));
+        doReturn(booksDocument).when(connector).execute(any(Connection.class));
+
+        client.fetchOptimizingBooks(listener);
+
+        assertThat(fetchBooks.get(0).getFilename(), is("hoge.pdf"));
+        assertThat(fetchBooks.get(0).getType(), is("Kindle PaperWhiteチューニング"));
+        assertThat(fetchBooks.get(0).getRequestedAt(), is("2000年01月01日 00:00"));
+        assertThat(fetchBooks.get(0).getStatus(), is("チューニング開始前"));
+
+        assertThat(fetchBooks.get(1).getFilename(), is("fuga.pdf"));
+        assertThat(fetchBooks.get(1).getType(), is("Androidチューニング"));
+        assertThat(fetchBooks.get(1).getRequestedAt(), is("2010年01月01日 00:00"));
+        assertThat(fetchBooks.get(1).getStatus(), is("チューニング中"));
     }
 }

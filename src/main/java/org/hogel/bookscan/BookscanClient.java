@@ -2,12 +2,10 @@ package org.hogel.bookscan;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.hogel.bookscan.listener.FetchBooksListener;
-import org.hogel.bookscan.listener.FetchOptimizedBooksListener;
-import org.hogel.bookscan.listener.LoginListener;
-import org.hogel.bookscan.listener.RequestBookOptimizeListener;
+import org.hogel.bookscan.listener.*;
 import org.hogel.bookscan.model.Book;
 import org.hogel.bookscan.model.OptimizedBook;
+import org.hogel.bookscan.model.OptimizingBook;
 import org.jsoup.Connection;
 import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
@@ -21,6 +19,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BookscanClient {
     private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -184,5 +184,36 @@ public class BookscanClient {
         }
         
         return keyVals;
+    }
+
+    private static final Pattern OPTIMIZING_BOOK_PATTERN =
+        Pattern.compile("(.+\\.pdf)\\s*チューニングタイプ:(.+)\\s*チューニング依頼日時:(\\d+年\\d+月\\d+日 \\d+:\\d+)\\s*(.+)\\s+優先度:");
+    public void fetchOptimizingBooks(FetchOptimizingBooksListener listener) {
+        Connection connection = connector.connect(Constants.URL_OPTIMIZING_BOOKS).method(Connection.Method.GET);
+        try {
+            Document document = connector.execute(connection);
+
+            Elements typeLabels = document.getElementsContainingOwnText("チューニングタイプ:");
+            List<OptimizingBook> books = new ArrayList<>();
+            for (Element typeLabel : typeLabels) {
+                Element container = typeLabel.parent();
+                String text = container.text();
+
+                Matcher matcher = OPTIMIZING_BOOK_PATTERN.matcher(text);
+                if (!matcher.find()) {
+                    continue;
+                }
+
+                String file = matcher.group(1).trim();
+                String type = matcher.group(2).trim();
+                String requestedAt = matcher.group(3).trim();
+                String status = matcher.group(4).trim();
+                OptimizingBook book = new OptimizingBook(file, type, requestedAt, status);
+                books.add(book);
+            }
+            listener.onSuccess(books);
+        } catch (IOException e) {
+            listener.onError(e);
+        }
     }
 }

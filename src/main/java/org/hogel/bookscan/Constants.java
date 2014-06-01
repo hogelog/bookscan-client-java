@@ -8,4 +8,5 @@ public class Constants {
     public static final String URL_OPTIMIZE = "https://system.bookscan.co.jp/bookoptimize.php";
     public static final String URL_OPTIMIZED_BOOKS = "https://system.bookscan.co.jp/tunelablist.php";
     public static final String URL_OPTIMIZED = "https://system.bookscan.co.jp/bookoptimize_end.php";
+    public static final String URL_OPTIMIZING_BOOKS = "https://system.bookscan.co.jp/tunelabnowlist.php";
 }
