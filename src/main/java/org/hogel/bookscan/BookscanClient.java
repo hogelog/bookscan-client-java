@@ -39,6 +39,11 @@ public class BookscanClient {
         return connector.getCookies();
     }
 
+    public boolean isLogin() {
+        Map<String, String> cookies = connector.getCookies();
+        return cookies.containsKey("email") && cookies.containsKey("password");
+    }
+
     public void login(String email, String password, LoginListener listener) {
         Connection connection = connector.connect(Constants.URL_LOGIN)
             .method(Connection.Method.POST)

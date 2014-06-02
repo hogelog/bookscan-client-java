@@ -52,6 +52,25 @@ public class BookscanClientTest {
     }
 
     @Test
+    public void isLoginSuccess() throws IOException {
+        cookies.put("email", "test");
+        cookies.put("password", "test");
+
+        doReturn(cookies).when(connector).getCookies();
+
+        assertThat(client.isLogin(), is(true));
+    }
+
+    @Test
+    public void isLoginFailue() throws IOException {
+        cookies.clear();
+
+        doReturn(cookies).when(connector).getCookies();
+
+        assertThat(client.isLogin(), is(false));
+    }
+
+    @Test
     public void loginSuccess() throws IOException {
         Document loginSuccessDocument = new Document(Constants.URL_MYPAGE);
         doReturn(loginSuccessDocument).when(response).parse();
