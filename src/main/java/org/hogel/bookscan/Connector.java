@@ -12,4 +12,6 @@ public interface Connector {
     Document execute(Connection connection) throws IOException;
 
     Map<String, String> getCookies();
+
+    void putCookies(Map<String, String> cookies);
 }

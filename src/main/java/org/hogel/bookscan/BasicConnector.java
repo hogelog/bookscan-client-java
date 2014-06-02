@@ -27,4 +27,9 @@ public class BasicConnector implements Connector {
     public Map<String, String> getCookies() {
         return cookies;
     }
+
+    @Override
+    public void putCookies(Map<String, String> cookies) {
+        cookies.putAll(cookies);
+    }
 }
