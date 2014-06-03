@@ -39,7 +39,7 @@ public class BookscanClient {
         return connector.getCookies();
     }
 
-    public void getCookies(Map<String, String> cookies) {
+    public void putCookies(Map<String, String> cookies) {
         connector.putCookies(cookies);
     }
 
