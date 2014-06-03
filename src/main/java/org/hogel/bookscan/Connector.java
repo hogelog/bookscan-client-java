@@ -14,4 +14,6 @@ public interface Connector {
     Map<String, String> getCookies();
 
     void putCookies(Map<String, String> cookies);
+
+    void clearCookies();
 }

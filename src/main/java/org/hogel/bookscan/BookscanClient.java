@@ -35,14 +35,6 @@ public class BookscanClient {
         this.connector = connector;
     }
 
-    public Map<String, String> getCookies() {
-        return connector.getCookies();
-    }
-
-    public void putCookies(Map<String, String> cookies) {
-        connector.putCookies(cookies);
-    }
-
     public boolean isLogin() {
         Map<String, String> cookies = connector.getCookies();
         return cookies.containsKey("email") && cookies.containsKey("password");
@@ -224,5 +216,17 @@ public class BookscanClient {
         } catch (IOException e) {
             listener.onError(e);
         }
+    }
+
+    public Map<String, String> getCookies() {
+        return connector.getCookies();
+    }
+
+    public void putCookies(Map<String, String> cookies) {
+        connector.putCookies(cookies);
+    }
+
+    public void clearCookies() {
+        connector.clearCookies();
     }
 }

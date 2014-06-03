@@ -32,4 +32,9 @@ public class BasicConnector implements Connector {
     public void putCookies(Map<String, String> cookies) {
         cookies.putAll(cookies);
     }
+
+    @Override
+    public void clearCookies() {
+        cookies.clear();
+    }
 }
