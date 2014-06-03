@@ -1,9 +1,11 @@
 buildscript {
     repositories {
         maven { url 'http://jcenter.bintray.com' }
+        maven { url 'http://dl.bintray.com/jfrog/jfrog-jars' }
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.4'
     }
 }
 
@@ -11,9 +13,10 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'bintray'
+apply plugin: 'artifactory'
 
 group = 'org.hogel'
-version = '0.0.3'
+version = '0.0.3-SNAPSHOT'
 
 sourceCompatibility = 1.7
 
@@ -64,6 +67,29 @@ publishing {
             }
         }
     }
+}
+
+
+artifactory {
+  contextUrl = 'http://oss.jfrog.org'
+}
+
+artifactoryPublish { task ->
+  artifactory {
+    publish {
+      repository {
+        repoKey = 'oss-snapshot-local'
+
+        // Need this to enable non deployment builds without credentials
+        gradle.taskGraph.whenReady { taskGraph ->
+          if (taskGraph.hasTask(task)) {
+            username = "$BINTRAY_USER"
+            password = "$BINTRAY_TOKEN"
+          }
+        }
+      }
+    }
+  }
 }
 
 bintray {
