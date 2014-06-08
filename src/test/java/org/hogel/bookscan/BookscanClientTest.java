@@ -1,9 +1,7 @@
 package org.hogel.bookscan;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import org.hogel.bookscan.listener.*;
 import org.hogel.bookscan.model.Book;
 import org.hogel.bookscan.model.OptimizedBook;
 import org.hogel.bookscan.model.OptimizingBook;
@@ -21,6 +19,7 @@ import java.util.TreeMap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class BookscanClientTest {
@@ -71,16 +70,13 @@ public class BookscanClientTest {
     }
 
     @Test
-    public void loginSuccess() throws IOException {
+    public void loginSuccess() throws IOException, BookscanException {
         Document loginSuccessDocument = new Document(Constants.URL_MYPAGE);
         doReturn(loginSuccessDocument).when(response).parse();
 
         cookies.put("login", "success");
 
-        LoginListener listener = mock(LoginListener.class);
-        client.login("user", "password", listener);
-
-        verify(listener).onSuccess();
+        client.login("user", "password");
 
         assertThat(connector.getCookies().get("login"), is("success"));
     }
@@ -90,26 +86,19 @@ public class BookscanClientTest {
         Document loginErrorDocument = new Document(Constants.URL_LOGIN);
         doReturn(loginErrorDocument).when(response).parse();
 
-        LoginListener listener = mock(LoginListener.class);
-        client.login("user", "password", listener);
-
-        verify(listener).onError(any(Exception.class));
+        try {
+            client.login("user", "password");
+            assertTrue(false);
+        } catch (BookscanException e) {
+        }
     }
 
     @Test
     public void fetchBookListSuccess() throws IOException {
-        final List<Book> fetchBooks = Lists.newArrayList();
-        FetchBooksListener listener = new FetchBooksAdapter() {
-            @Override
-            public void onSuccess(List<Book> books) {
-                fetchBooks.addAll(books);
-            }
-        };
-
         Document booksDocument = Jsoup.parse(getResourceString("/data/books.html"));
         doReturn(booksDocument).when(connector).execute(any(Connection.class));
 
-        client.fetchBooks(listener);
+        List<Book> fetchBooks = client.fetchBooks();
 
         assertThat(fetchBooks.get(0).getHash(), is("hash1"));
         assertThat(fetchBooks.get(0).getDigest(), is("digest1"));
@@ -124,18 +113,10 @@ public class BookscanClientTest {
 
     @Test
     public void fetchOptimizedBookListSuccess() throws IOException {
-        final List<OptimizedBook> fetchBooks = Lists.newArrayList();
-        FetchOptimizedBooksListener listener = new FetchOptimizedBooksAdapter() {
-            @Override
-            public void onSuccess(List<OptimizedBook> books) {
-                fetchBooks.addAll(books);
-            }
-        };
-
         Document booksDocument = Jsoup.parse(getResourceString("/data/optimized_books.html"));
         doReturn(booksDocument).when(connector).execute(any(Connection.class));
 
-        client.fetchOptimizedBooks(listener);
+        List<OptimizedBook> fetchBooks = client.fetchOptimizedBooks();
 
         assertThat(fetchBooks.get(0).getDigest(), is("digest1"));
         assertThat(fetchBooks.get(0).getFilename(), is("filename1"));
@@ -145,9 +126,8 @@ public class BookscanClientTest {
     }
 
     @Test
-    public void requestBookOptimizeSuccess() throws IOException {
+    public void requestBookOptimizeSuccess() throws IOException, BookscanException {
         Book book = new Book("hoge.pdf", "hash", "digest", null);
-        RequestBookOptimizeListener listener = mock(RequestBookOptimizeListener.class);
 
         Document document = Jsoup.parse(getResourceString("/data/book_optimize.html"), book.createOptimizedUrl());
         doReturn(document).when(connector).execute(any(Connection.class));
@@ -160,9 +140,7 @@ public class BookscanClientTest {
         option.addFlag(OptimizeOption.Flag.COVER);
         option.addFlag(OptimizeOption.Flag.BOLD);
 
-        client.requestBookOptimize(book, option, listener);
-
-        verify(listener).onSuccess();
+        client.requestBookOptimize(book, option);
 
         verify(connection).data("abc", "12345");
         verify(connection).data("def", "67890");
@@ -176,18 +154,10 @@ public class BookscanClientTest {
 
     @Test
     public void fetchOptimizingBookListSuccess() throws IOException {
-        final List<OptimizingBook> fetchBooks = Lists.newArrayList();
-        FetchOptimizingBooksListener listener = new FetchOptimizingBooksAdapter() {
-            @Override
-            public void onSuccess(List<OptimizingBook> books) {
-                fetchBooks.addAll(books);
-            }
-        };
-
         Document booksDocument = Jsoup.parse(getResourceString("/data/optimizing_books.html"));
         doReturn(booksDocument).when(connector).execute(any(Connection.class));
 
-        client.fetchOptimizingBooks(listener);
+        final List<OptimizingBook> fetchBooks = client.fetchOptimizingBooks();
 
         assertThat(fetchBooks.get(0).getFilename(), is("hoge.pdf"));
         assertThat(fetchBooks.get(0).getType(), is("Kindle PaperWhiteチューニング"));
