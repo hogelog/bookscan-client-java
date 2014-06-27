@@ -28,6 +28,10 @@ public class AsyncBookscanClient {
         this.executorService = executorService;
     }
 
+    public boolean isLogin() {
+        return bookscanClient.isLogin();
+    }
+
     public Future<?> login(final String email, final String password, final LoginListener listener) {
         return executorService.submit(new Runnable() {
             @Override

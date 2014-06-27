@@ -16,7 +16,7 @@ apply plugin: 'bintray'
 apply plugin: 'artifactory'
 
 group = 'org.hogel'
-version = '0.0.4-SNAPSHOW'
+version = '0.0.4-SNAPSHOT'
 
 sourceCompatibility = 1.7
 
