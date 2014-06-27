@@ -5,6 +5,7 @@ import org.hogel.bookscan.model.Book;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -30,6 +31,18 @@ public class AsyncBookscanClient {
 
     public boolean isLogin() {
         return bookscanClient.isLogin();
+    }
+
+    public Map<String, String> getCookies() {
+        return bookscanClient.getCookies();
+    }
+
+    public void putCookies(Map<String, String> cookies) {
+        bookscanClient.putCookies(cookies);
+    }
+
+    public void clearCookies() {
+        bookscanClient.clearCookies();
     }
 
     public Future<?> login(final String email, final String password, final LoginListener listener) {
