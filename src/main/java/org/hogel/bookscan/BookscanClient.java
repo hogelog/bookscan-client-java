@@ -177,7 +177,7 @@ public class BookscanClient {
                 keyVals.add(HttpConnection.KeyVal.create(name, value));
             }
         }
-        
+
         return keyVals;
     }
 
