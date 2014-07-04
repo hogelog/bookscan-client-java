@@ -91,7 +91,7 @@ public class BookscanClient {
             if (imgElement.size() == 0) {
                 book = new Book(filename, hash, digest, null);
             } else {
-                book = new Book(filename, hash, digest, imgElement.first().attr("src"));
+                book = new Book(filename, hash, digest, imgElement.first().attr("data-original"));
             }
             books.add(book);
         }
