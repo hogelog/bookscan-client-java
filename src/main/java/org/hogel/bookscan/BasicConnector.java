@@ -30,7 +30,7 @@ public class BasicConnector implements Connector {
 
     @Override
     public void putCookies(Map<String, String> cookies) {
-        cookies.putAll(cookies);
+        this.cookies.putAll(cookies);
     }
 
     @Override
