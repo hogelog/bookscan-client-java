@@ -1,15 +1,22 @@
 package org.hogel.bookscan;
 
-import org.jsoup.nodes.Document;
-
 public class BookscanException extends Exception {
-    private final Document document;
-
-    public BookscanException(Document document) {
-        this.document = document;
+    public BookscanException() {
     }
 
-    public Document getDocument() {
-        return document;
+    public BookscanException(String message) {
+        super(message);
+    }
+
+    public BookscanException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public BookscanException(Throwable cause) {
+        super(cause);
+    }
+
+    public BookscanException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }
