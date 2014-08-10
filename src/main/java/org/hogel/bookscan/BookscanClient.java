@@ -72,7 +72,7 @@ public class BookscanClient {
         };
     }
 
-    public Request<List<Book>> fetchBooks() throws IOException {
+    public Request<List<Book>> fetchBooks() {
         Connection connection = connector.connect(Constants.URL_MYPAGE).method(Connection.Method.GET);
         return new Request<List<Book>>(executorService, connector, connection) {
             @Override
@@ -120,7 +120,7 @@ public class BookscanClient {
         };
     }
 
-    public Request<List<OptimizedBook>> fetchOptimizedBooks() throws IOException {
+    public Request<List<OptimizedBook>> fetchOptimizedBooks() {
         Connection connection = connector.connect(Constants.URL_OPTIMIZED_BOOKS).method(Connection.Method.GET);
         return new Request<List<OptimizedBook>>(executorService, connector, connection) {
             @Override
