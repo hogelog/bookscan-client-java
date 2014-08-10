@@ -2,6 +2,7 @@ package org.hogel.bookscan;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import org.hogel.bookscan.exception.BookscanException;
 import org.hogel.bookscan.model.Book;
 import org.hogel.bookscan.model.OptimizedBook;
 import org.hogel.bookscan.model.OptimizingBook;
@@ -12,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -31,7 +33,8 @@ public class BookscanClientTest {
     private BookscanClient client;
 
     private String getResourceString(String resourceName) throws IOException {
-        return Resources.toString(getClass().getResource(resourceName), Charsets.UTF_8);
+        URL resourceUrl = getClass().getResource(resourceName);
+        return Resources.toString(resourceUrl, Charsets.UTF_8);
     }
 
     @Before
@@ -76,7 +79,7 @@ public class BookscanClientTest {
 
         cookies.put("login", "success");
 
-        client.login("user", "password");
+        client.login("user", "password").get();
 
         assertThat(connector.getCookies().get("login"), is("success"));
     }
@@ -87,18 +90,18 @@ public class BookscanClientTest {
         doReturn(loginErrorDocument).when(response).parse();
 
         try {
-            client.login("user", "password");
+            client.login("user", "password").get();
             assertTrue(false);
         } catch (BookscanException e) {
         }
     }
 
     @Test
-    public void fetchBookListSuccess() throws IOException {
+    public void fetchBookListSuccess() throws IOException, BookscanException {
         Document booksDocument = Jsoup.parse(getResourceString("/data/books.html"));
         doReturn(booksDocument).when(connector).execute(any(Connection.class));
 
-        List<Book> fetchBooks = client.fetchBooks();
+        List<Book> fetchBooks = client.fetchBooks().get();
 
         assertThat(fetchBooks.get(0).getHash(), is("hash1"));
         assertThat(fetchBooks.get(0).getDigest(), is("digest1"));
@@ -112,11 +115,11 @@ public class BookscanClientTest {
     }
 
     @Test
-    public void fetchOptimizedBookListSuccess() throws IOException {
+    public void fetchOptimizedBookListSuccess() throws IOException, BookscanException {
         Document booksDocument = Jsoup.parse(getResourceString("/data/optimized_books.html"));
         doReturn(booksDocument).when(connector).execute(any(Connection.class));
 
-        List<OptimizedBook> fetchBooks = client.fetchOptimizedBooks();
+        List<OptimizedBook> fetchBooks = client.fetchOptimizedBooks().get();
 
         assertThat(fetchBooks.get(0).getDigest(), is("digest1"));
         assertThat(fetchBooks.get(0).getFilename(), is("filename1"));
@@ -140,7 +143,7 @@ public class BookscanClientTest {
         option.addFlag(OptimizeOption.Flag.COVER);
         option.addFlag(OptimizeOption.Flag.BOLD);
 
-        client.requestBookOptimize(book, option);
+        client.requestBookOptimize(book, option).get();
 
         verify(connection).data("abc", "12345");
         verify(connection).data("def", "67890");
@@ -153,11 +156,34 @@ public class BookscanClientTest {
     }
 
     @Test
-    public void fetchOptimizingBookListSuccess() throws IOException {
+    public void fetchHiddenOptimizeOptionsSuccess() throws BookscanException, IOException {
+        Book book = new Book("hoge.pdf", "hash", "digest", null);
+
+        String optimizeUrl = book.createOptimizeUrl();
+        Document document = Jsoup.parse(getResourceString("/data/book_optimize.html"), optimizeUrl);
+        doReturn(document).when(connector).execute(any(Connection.class));
+
+        List<Connection.KeyVal> hiddenOptions = client.fetchHiddenOptimizeOptions(optimizeUrl);
+
+        assertThat(findValue("abc", hiddenOptions), is("12345"));
+        assertThat(findValue("def", hiddenOptions), is("67890"));
+    }
+
+    private String findValue(String key, List<Connection.KeyVal> options) {
+        for (Connection.KeyVal option: options) {
+            if (option.key().equals(key)) {
+                return option.value();
+            }
+        }
+        return null;
+    }
+
+    @Test
+    public void fetchOptimizingBookListSuccess() throws IOException, BookscanException {
         Document booksDocument = Jsoup.parse(getResourceString("/data/optimizing_books.html"));
         doReturn(booksDocument).when(connector).execute(any(Connection.class));
 
-        final List<OptimizingBook> fetchBooks = client.fetchOptimizingBooks();
+        final List<OptimizingBook> fetchBooks = client.fetchOptimizingBooks().get();
 
         assertThat(fetchBooks.get(0).getFilename(), is("hoge.pdf"));
         assertThat(fetchBooks.get(0).getType(), is("Kindle PaperWhiteチューニング"));
