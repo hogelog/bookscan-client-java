@@ -2,6 +2,7 @@ package org.hogel.bookscan;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.hogel.bookscan.exception.BookscanException;
 import org.hogel.bookscan.exception.BookscanNetworkException;
 import org.hogel.bookscan.exception.BookscanResponseException;
 import org.hogel.bookscan.model.Book;

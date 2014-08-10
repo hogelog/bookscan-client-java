@@ -1,4 +1,4 @@
-package org.hogel.bookscan;
+package org.hogel.bookscan.exception;
 
 public class BookscanException extends Exception {
     public BookscanException() {

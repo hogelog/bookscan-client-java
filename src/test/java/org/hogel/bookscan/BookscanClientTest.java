@@ -2,6 +2,7 @@ package org.hogel.bookscan;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import org.hogel.bookscan.exception.BookscanException;
 import org.hogel.bookscan.model.Book;
 import org.hogel.bookscan.model.OptimizedBook;
 import org.hogel.bookscan.model.OptimizingBook;

@@ -1,6 +1,5 @@
 package org.hogel.bookscan.exception;
 
-import org.hogel.bookscan.BookscanException;
 import org.jsoup.nodes.Document;
 
 public class BookscanResponseException extends BookscanException {

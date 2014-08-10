@@ -1,5 +1,5 @@
 package org.hogel.bookscan.reqeust;
 
-public interface ErrorListener {
+public interface RequestErrorListener {
     void error(Exception e);
 }

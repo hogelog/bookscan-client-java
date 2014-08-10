@@ -1,6 +1,6 @@
 package org.hogel.bookscan.reqeust;
 
-import org.hogel.bookscan.BookscanException;
+import org.hogel.bookscan.exception.BookscanException;
 import org.hogel.bookscan.Connector;
 import org.hogel.bookscan.exception.BookscanNetworkException;
 import org.jsoup.Connection;
@@ -14,7 +14,7 @@ public abstract class Request<T> {
     private final Connector connector;
     private final Connection connection;
     private RequestListener<T> listener;
-    private ErrorListener errorListener;
+    private RequestErrorListener requestErrorListener;
 
     public Request(ExecutorService executorService, Connector connector, Connection connection) {
         this.executorService = executorService;
@@ -37,8 +37,8 @@ public abstract class Request<T> {
         return this;
     }
 
-    public Request<T> error(ErrorListener errorListener) {
-        this.errorListener = errorListener;
+    public Request<T> error(RequestErrorListener requestErrorListener) {
+        this.requestErrorListener = requestErrorListener;
         return this;
     }
 
@@ -57,8 +57,8 @@ public abstract class Request<T> {
                         listener.success(result);
                     }
                 } catch (BookscanException e) {
-                    if (errorListener != null) {
-                        errorListener.error(e);
+                    if (requestErrorListener != null) {
+                        requestErrorListener.error(e);
                     }
                 }
             }
