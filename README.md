@@ -18,7 +18,7 @@ Bookscan client for Java
     <dependency>
       <groupId>org.hogel</groupId>
       <artifactId>bookscan-client</artifactId>
-      <version>0.0.2</version>
+      <version>0.0.5</version>
     </dependency>
   </dependencies>
 
@@ -33,6 +33,6 @@ repositories {
 }
 
 dependencies {
-    compile 'org.hogel:bookscan-client:0.0.2'
+    compile 'org.hogel:bookscan-client:0.0.5'
 }
 ```
