@@ -33,6 +33,6 @@ repositories {
 }
 
 dependencies {
-    compile 'org.hogel:bookscan-client:0.0.5'
+    compile 'org.hogel:bookscan-client:0.0.6'
 }
 ```

@@ -159,34 +159,33 @@ public class BookscanClient {
     }
 
     public Request<Void> requestBookOptimize(final Book book, final OptimizeOption option) throws BookscanException {
-        Connection connection = connector.connect(Constants.URL_OPTIMIZED_BOOKS).method(Connection.Method.GET);
+        String optimizeUrl = book.createOptimizeUrl();
+
+        final List<OptimizeOption.Type> types = option.getTypes();
+        final List<OptimizeOption.Flag> flags = option.getFlags();
+        if (types.size() == 0) {
+            throw new IllegalArgumentException("Optimize option is not specified");
+        }
+
+        List<Connection.KeyVal> hiddenOptions = fetchHiddenOptimizeOptions(optimizeUrl);
+
+        Connection connection = connector.connect(optimizeUrl).method(Connection.Method.POST);
+
+        for (Connection.KeyVal hiddenOption : hiddenOptions) {
+            connection = connection.data(hiddenOption.key(), hiddenOption.value());
+        }
+
+        for (OptimizeOption.Type type : types) {
+            connection = connection.data(OptimizeOption.OPTIMIZE_TYPE_NAME, type.getValue());
+        }
+
+        for (OptimizeOption.Flag flag : flags) {
+            connection = connection.data(flag.getInputName(), flag.getValue());
+        }
+
         return new Request<Void>(executorService, connector, connection) {
             @Override
             public Void get() throws BookscanException {
-                String optimizeUrl = book.createOptimizeUrl();
-
-                final List<OptimizeOption.Type> types = option.getTypes();
-                final List<OptimizeOption.Flag> flags = option.getFlags();
-                if (types.size() == 0) {
-                    throw new IllegalArgumentException("Optimize option is not specified");
-                }
-
-                List<Connection.KeyVal> hiddenOptions = fetchHiddenOptimizeOptions(optimizeUrl);
-
-                Connection connection = connector.connect(optimizeUrl).method(Connection.Method.POST);
-
-                for (Connection.KeyVal hiddenOption : hiddenOptions) {
-                    connection = connection.data(hiddenOption.key(), hiddenOption.value());
-                }
-
-                for (OptimizeOption.Type type : types) {
-                    connection = connection.data(OptimizeOption.OPTIMIZE_TYPE_NAME, type.getValue());
-                }
-
-                for (OptimizeOption.Flag flag : flags) {
-                    connection = connection.data(flag.getInputName(), flag.getValue());
-                }
-
                 Document document = getDocument();
                 if (!book.createOptimizedUrl().equals(document.location())) {
                     throw new BookscanResponseException(document);
