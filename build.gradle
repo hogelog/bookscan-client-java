@@ -5,7 +5,7 @@ apply plugin: 'signing'
 
 group = 'org.hogel'
 archivesBaseName = 'bookscan-client'
-version = '0.0.7-SNAPSHOT'
+version = '0.0.7'
 
 sourceCompatibility = 1.7
 
