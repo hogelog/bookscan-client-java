@@ -1,21 +1,10 @@
-buildscript {
-    repositories {
-        maven { url 'http://jcenter.bintray.com' }
-        maven { url 'http://dl.bintray.com/jfrog/jfrog-jars' }
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.4'
-    }
-}
-
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
-apply plugin: 'bintray'
-apply plugin: 'artifactory'
+apply plugin: 'signing'
 
 group = 'org.hogel'
+archivesBaseName = 'bookscan-client'
 version = '0.0.7-SNAPSHOT'
 
 sourceCompatibility = 1.7
@@ -35,79 +24,76 @@ dependencies {
     testCompile 'ch.qos.logback:logback-classic:1.1.2'
 }
 
-task sourceJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allJava
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
 artifacts {
-    archives jar
-    archives sourceJar
-    archives javadocJar
+    archives jar, sourcesJar, javadocJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId "$group"
-            artifactId "bookscan-client"
-            version "$version"
+signing {
+    sign configurations.archives
+}
 
-            from components.java
-            artifact sourceJar
-            artifact javadocJar
+def nexusUsername() {
+    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+def nexusPassword() {
+    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: nexusUsername(), password: nexusPassword())
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+          authentication(userName: nexusUsername(), password: nexusPassword())
+      }
+
+      pom.project {
+        name archivesBaseName
+        packaging 'jar'
+        artifactId archivesBaseName
+        description 'Bookscan client library for Java'
+        url 'https://github.com/hogelog/bookscan-client-java'
+
+        scm {
+          connection 'scm:git@github.com:hogelog/bookscan-client-java.git'
+          developerConnection 'scm:git@github.com:hogelog/bookscan-client-java.git'
+          url 'https://github.com/hogelog/bookscan-client-java'
         }
 
-        repositories {
-            maven {
-                url "$buildDir/repo"
-            }
+        licenses {
+          license {
+            name 'The MIT License (MIT)'
+            url 'http://opensource.org/licenses/MIT'
+          }
         }
-    }
-}
 
-
-artifactory {
-  contextUrl = 'http://oss.jfrog.org'
-}
-
-artifactoryPublish { task ->
-  artifactory {
-    publish {
-      repository {
-        repoKey = 'oss-snapshot-local'
-
-        // Need this to enable non deployment builds without credentials
-        gradle.taskGraph.whenReady { taskGraph ->
-          if (taskGraph.hasTask(task)) {
-            username = "$BINTRAY_USER"
-            password = "$BINTRAY_TOKEN"
+        developers {
+          developer {
+            id 'hogelog'
+            name 'Sunao Komuro'
+            email 'konbu.komuro@gmail.com'
           }
         }
       }
     }
   }
 }
-
-bintray {
-    user = "$BINTRAY_USER"
-    key = "$BINTRAY_TOKEN"
-    publications = ['mavenJava']
-    pkg {
-        repo = 'maven'
-        userOrg = 'hogelog'
-        name = 'bookscan-client-java'
-        desc = 'Bookscan client for Java'
-        licenses = ['MIT']
-        labels = []
-    }
-}
-bintrayUpload.dependsOn publish
 
 task releaseTag(type:Exec) {
     commandLine 'git', 'tag', "$version"
@@ -117,8 +103,8 @@ task releasePush(type:Exec) {
     commandLine 'git', 'push', "--tags"
 }
 
-task release(dependsOn: [check, publish, releaseTag, releasePush, bintrayUpload])
+task release(dependsOn: [check, publish, releaseTag, releasePush, uploadArchives])
 publish.mustRunAfter check
 releaseTag.mustRunAfter publish
 releasePush.mustRunAfter releaseTag
-bintrayUpload.mustRunAfter releasePush
+uploadArchives.mustRunAfter releasePush
