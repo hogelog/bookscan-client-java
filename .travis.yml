@@ -1,7 +1,6 @@
 language: java
 env:
   global:
-    - ORG_GRADLE_PROJECT_BINTRAY_USER=hogelog
-    - secure: "W5qcAGbDxlacpP2/yj8Gt1ctjKklfAJy8F9Uvzb8O1PL7BEtG8ZdKRmyvuYFP36dFNQBLNR/wQbTPuP0hQiH6dklVPN0SwyIA/OGy4UGdKjD7sSZK9DEknzGV2q0sSFilPlClR2nVb8dcknpG0S+zsv0j3qB1nDDomKJUw5Tl70="
+    - ORG_GRADLE_PROJECT_SKIP_SIGNING=true
 script:
   - ./gradlew check

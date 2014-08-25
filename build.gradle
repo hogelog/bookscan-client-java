@@ -38,8 +38,10 @@ artifacts {
     archives jar, sourcesJar, javadocJar
 }
 
-signing {
-    sign configurations.archives
+if (!hasProperty('SKIP_SIGNING')) {
+    signing {
+        sign configurations.archives
+    }
 }
 
 def nexusUsername() {
