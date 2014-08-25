@@ -1,4 +1,4 @@
-# bookscan-client-java [![Travis CI Status](https://travis-ci.org/hogelog/bookscan-client-java.svg)](https://travis-ci.org/hogelog/bookscan-client-java)
+# bookscan-client-java [![Travis CI Status](https://travis-ci.org/hogelog/bookscan-client-java.svg)](https://travis-ci.org/hogelog/bookscan-client-java) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.hogel/bookscan-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.hogel/bookscan-client)
 
 Bookscan client for Java
 
