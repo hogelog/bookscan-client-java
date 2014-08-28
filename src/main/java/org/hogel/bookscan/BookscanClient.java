@@ -35,7 +35,10 @@ public class BookscanClient {
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private final Connector connector;
+
     private final ExecutorService executorService;
+
+    private Integer defaultTimeout;
 
     public BookscanClient() {
         this(new BasicConnector());
@@ -56,8 +59,7 @@ public class BookscanClient {
     }
 
     public Request<Void> login(String email, String password) {
-        Connection connection = connector.connect(Constants.URL_LOGIN)
-            .method(Connection.Method.POST)
+        Connection connection = connect(Constants.URL_LOGIN, Connection.Method.POST)
             .data("email", email)
             .data("password", password);
         return new Request<Void>(executorService, connector, connection) {
@@ -73,7 +75,7 @@ public class BookscanClient {
     }
 
     public Request<List<Book>> fetchBooks() {
-        Connection connection = connector.connect(Constants.URL_MYPAGE).method(Connection.Method.GET);
+        Connection connection = connect(Constants.URL_MYPAGE, Connection.Method.GET);
         return new Request<List<Book>>(executorService, connector, connection) {
             @Override
             public List<Book> get() throws BookscanException {
@@ -121,7 +123,7 @@ public class BookscanClient {
     }
 
     public Request<List<OptimizedBook>> fetchOptimizedBooks() {
-        Connection connection = connector.connect(Constants.URL_OPTIMIZED_BOOKS).method(Connection.Method.GET);
+        Connection connection = connect(Constants.URL_OPTIMIZED_BOOKS, Connection.Method.GET);
         return new Request<List<OptimizedBook>>(executorService, connector, connection) {
             @Override
             public List<OptimizedBook> get() throws BookscanException {
@@ -169,7 +171,7 @@ public class BookscanClient {
 
         List<Connection.KeyVal> hiddenOptions = fetchHiddenOptimizeOptions(optimizeUrl);
 
-        Connection connection = connector.connect(optimizeUrl).method(Connection.Method.POST);
+        Connection connection = connect(optimizeUrl, Connection.Method.POST);
 
         for (Connection.KeyVal hiddenOption : hiddenOptions) {
             connection = connection.data(hiddenOption.key(), hiddenOption.value());
@@ -197,7 +199,7 @@ public class BookscanClient {
     }
 
     public List<Connection.KeyVal> fetchHiddenOptimizeOptions(String optimizeUrl) throws BookscanNetworkException {
-        Connection connection = connector.connect(optimizeUrl).method(Connection.Method.GET);
+        Connection connection = connect(optimizeUrl, Connection.Method.GET);
         try {
             Document document = connector.execute(connection);
             Elements inputs = document.select("input");
@@ -221,7 +223,7 @@ public class BookscanClient {
     private static final Pattern OPTIMIZING_BOOK_PATTERN =
         Pattern.compile("(.+\\.pdf)\\s*チューニングタイプ:(.+)\\s*チューニング依頼日時:(\\d+年\\d+月\\d+日 \\d+:\\d+)\\s*(.+)\\s+優先度:");
     public Request<List<OptimizingBook>> fetchOptimizingBooks() {
-        Connection connection = connector.connect(Constants.URL_OPTIMIZING_BOOKS).method(Connection.Method.GET);
+        Connection connection = connect(Constants.URL_OPTIMIZING_BOOKS, Connection.Method.GET);
         return new Request<List<OptimizingBook>>(executorService, connector, connection) {
             @Override
             public List<OptimizingBook> get() throws BookscanException {
@@ -250,6 +252,11 @@ public class BookscanClient {
         };
     }
 
+    private Connection connect(String url, Connection.Method method) {
+        Connection connection = connector.connect(url).method(method);
+        return defaultTimeout == null ? connection : connection.timeout(defaultTimeout);
+    }
+
     public Map<String, String> getCookies() {
         return connector.getCookies();
     }
@@ -260,5 +267,9 @@ public class BookscanClient {
 
     public void clearCookies() {
         connector.clearCookies();
+    }
+
+    public void setDefaultTimeout(int defaultTimeout) {
+        this.defaultTimeout = defaultTimeout;
     }
 }
